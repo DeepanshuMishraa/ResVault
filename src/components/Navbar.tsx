@@ -32,7 +32,7 @@ const Navbar = () => {
           ResVault
         </Link>
         <div className="space-x-6 flex items-center">
-          <NavLink to="/explore" isActive={location.pathname === "/explore"}>
+          <NavLink to="/login" isActive={location.pathname === "/explore"}>
             Explore
           </NavLink>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

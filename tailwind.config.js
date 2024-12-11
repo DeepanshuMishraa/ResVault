@@ -7,6 +7,7 @@ export default {
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
         raleway: ["Raleway", "sans-serif"],
+        rubik: ["Rubik", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
