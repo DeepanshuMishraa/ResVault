@@ -10,6 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { BACKEND_URL } from "@/config";
+import { useAuth } from "@/lib/AuthContext";
 
 type FormData = {
   email: string;
@@ -21,6 +22,7 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const {
     register,
@@ -37,12 +39,7 @@ const LoginPage = () => {
       });
 
       if (response.data.token) {
-        localStorage.setItem("authToken", response.data.token);
-        toast({
-          title: "Login Successfull",
-          description: "Redirecting to explore page",
-          variant: "default",
-        });
+        login(response.data.token);
         navigate("/explore");
       } else {
         toast({
