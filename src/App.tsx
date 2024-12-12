@@ -12,7 +12,7 @@ function App() {
           <Toaster />
         </div>
       </AuthProvider>
-    </Router>
+    </Router>       
   );
 }
 

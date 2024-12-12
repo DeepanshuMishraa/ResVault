@@ -4,7 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Explore from "./pages/Explore";
 import Home from "./pages/Home";
-
+import Upload from "./pages/Upload";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isLoggedIn } = useAuth();
@@ -27,6 +27,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Explore />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/upload"
+        element={
+          <ProtectedRoute>
+            <Upload />
           </ProtectedRoute>
         }
       />

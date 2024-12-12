@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Github, Upload, LogOut } from "lucide-react";
+import { Github, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import { OurUploadButton } from "./UploadButton";
+
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -40,12 +42,9 @@ const Navbar = () => {
 
           {isLoggedIn ? (
             <>
-              <NavLink to="/upload" isActive={location.pathname === "/upload"}>
                 <div className="flex items-center gap-2">
-                  <Upload size={20} />
-                  <span>Upload</span>
+                    <OurUploadButton/>
                 </div>
-              </NavLink>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
