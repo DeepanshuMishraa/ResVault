@@ -3,8 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Github, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
-import { OurUploadButton } from "./UploadButton";
-
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -15,8 +13,8 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
@@ -42,9 +40,9 @@ const Navbar = () => {
 
           {isLoggedIn ? (
             <>
-                <div className="flex items-center gap-2">
-                    <OurUploadButton/>
-                </div>
+              <div className="flex items-center gap-2">
+                <Link to="/upload">Upload</Link>
+              </div>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

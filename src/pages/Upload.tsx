@@ -1,5 +1,11 @@
+import { FileUpload } from "@/components/FileUpload";
+
 const Upload = () => {
-  return <div>Upload Page</div>;
+  return (
+    <div>
+      <FileUpload />
+    </div>
+  );
 };
 
 export default Upload;
