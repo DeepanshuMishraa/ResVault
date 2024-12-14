@@ -11,11 +11,8 @@ export const getUser = () => {
   if (!token) return null;
 
   try {
-    // Split the token and get the payload part (second part)
     const payload = token.split('.')[1];
-    // Decode the base64 string
     const decodedPayload = atob(payload);
-    // Parse the JSON
     const parsedPayload: DecodedToken = JSON.parse(decodedPayload);
 
     return {
