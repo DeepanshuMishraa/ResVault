@@ -2,6 +2,12 @@ import { BACKEND_URL } from "@/config";
 import { useAuth } from "@/lib/AuthContext";
 import axios from "axios";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Plus, Upload, X } from "lucide-react";
 
 export const FileUpload = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -10,7 +16,8 @@ export const FileUpload = () => {
   const [name, setName] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const {user} = useAuth();
+  const [links, setLinks] = useState<string[]>([""]);
+  const { user } = useAuth();
 
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -20,7 +27,7 @@ export const FileUpload = () => {
         const base64WithType = {
           data: reader.result as string,
           fileType: file.type,
-          fileName: file.name
+          fileName: file.name,
         };
         resolve(JSON.stringify(base64WithType));
       };
@@ -36,7 +43,7 @@ export const FileUpload = () => {
   };
 
   const handleUpload = async () => {
-    if (!file || !name || !category || !description) {
+    if (!file || !name || !category || !description || !links) {
       setError("All fields are required");
       return;
     }
@@ -45,7 +52,7 @@ export const FileUpload = () => {
       setIsUploading(true);
       const base64File = await convertFileToBase64(file);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
 
       const response = await axios.post(
         `${BACKEND_URL}/api/v1/upload`,
@@ -54,13 +61,14 @@ export const FileUpload = () => {
           name,
           category,
           description,
-          userId: user?.userId as string
+          userId: user?.userId as string,
+          links: links.filter((link) => link.trim() !== ""),
         },
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
 
@@ -70,6 +78,7 @@ export const FileUpload = () => {
         setName("");
         setCategory("");
         setDescription("");
+        setLinks([""]);
       } else {
         setError(response.data.message || "Upload failed");
       }
@@ -81,57 +90,104 @@ export const FileUpload = () => {
     }
   };
 
+  const addLinkField = () => {
+    setLinks([...links, ""]);
+  };
+
+  const updateLink = (index: number, value: string) => {
+    const updatedLinks = [...links];
+    updatedLinks[index] = value;
+    setLinks(updatedLinks);
+  };
+
+  const removeLink = (index: number) => {
+    const updatedLinks = links.filter((_, i) => i !== index);
+    setLinks(updatedLinks);
+  };
+
   return (
-    <div className="p-4">
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Name</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-        />
-      </div>
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle>Upload File</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter file name"
+            />
+          </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Category</label>
-        <input
-          type="text"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-        />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            <Input
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="Enter category"
+            />
+          </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Description</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-        />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
+              placeholder="Enter description"
+              rows={3}
+            />
+          </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">File</label>
-        <input
-          type="file"
-          onChange={handleFileChange}
-          className="mt-1 block w-full"
-        />
-      </div>
+          <div className="space-y-2">
+            <Label>Links</Label>
+            {links.map((link, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <Input
+                  value={link}
+                  onChange={(e) => updateLink(index, e.target.value)}
+                  placeholder="Enter link"
+                />
+                {index === links.length - 1 ? (
+                  <Button type="button" size="icon" onClick={addLinkField}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="destructive"
+                    onClick={() => removeLink(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
 
-      {error && (
-        <div className="mb-4 text-red-500">{error}</div>
-      )}
+          <div className="space-y-2">
+            <Label htmlFor="file">File</Label>
+            <Input id="file" type="file" onChange={handleFileChange} />
+          </div>
 
-      <button
-        onClick={handleUpload}
-        disabled={isUploading}
-        className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-400"
-      >
-        {isUploading ? "Uploading..." : "Upload"}
-      </button>
-    </div>
+          {error && <div className="text-red-500">{error}</div>}
+
+          <Button
+            type="button"
+            onClick={handleUpload}
+            disabled={isUploading}
+            className="w-full"
+          >
+            {isUploading ? "Uploading..." : "Upload"}
+            <Upload className="ml-2 h-4 w-4" />
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };

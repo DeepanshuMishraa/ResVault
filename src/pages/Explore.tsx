@@ -2,13 +2,16 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search } from "lucide-react";
+import { Search, Loader2, FileText } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { motion } from "framer-motion";
 
 interface Resource {
   id: string;
   name: string;
   data: string;
+  description?: string;
+  links?: string[];
   category: {
     name: string;
   };
@@ -38,7 +41,6 @@ const Explore = () => {
       const data = await response.json();
       setResources(data.feed);
 
-      // Extract unique categories
       const uniqueCategories = Array.from(
         new Set(data.feed.map((r: Resource) => r.category?.name))
       ).filter(Boolean);
@@ -62,95 +64,167 @@ const Explore = () => {
   );
 
   return (
-    <>
-    <Navbar/>
-      <div className="container mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold mb-8">Explore Resources</h1>
+    <div className="min-h-screen bg-background font-raleway">
+      <Navbar />
+      <div className="container mx-auto py-24 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h1 className="text-4xl font-bold mb-8 text-center">
+            Explore Resources
+          </h1>
 
-        {/* Search Bar */}
-        <div className="relative mb-8">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <Input
-            placeholder="Search resources..."
-            className="pl-10 w-full max-w-md"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+          <div className="relative mb-8 max-w-md mx-auto">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder="Search resources..."
+              className="pl-10 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
-        {/* Categories Tabs */}
-        <Tabs defaultValue="all" className="mb-8">
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            {categories.map((category) => (
-              <TabsTrigger key={category.name} value={category.name}>
-                {category.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="w-full justify-start overflow-x-auto">
+              <TabsTrigger value="all">All</TabsTrigger>
+              {categories.map((category) => (
+                <TabsTrigger key={category.name} value={category.name}>
+                  {category.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-          {/* All Resources Tab */}
-          <TabsContent value="all">
-            {loading ? (
-              <p>Loading resources...</p>
-            ) : filteredResources.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredResources.map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-gray-500 mt-8">
-                No resources found
-              </p>
-            )}
-          </TabsContent>
-
-          {/* Category Tabs */}
-          {categories.map((category) => (
-            <TabsContent key={category.name} value={category.name}>
-              {category.resource.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {category.resource
-                    .filter((resource) =>
-                      resource.name
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase())
-                    )
-                    .map((resource) => (
-                      <ResourceCard key={resource.id} resource={resource} />
-                    ))}
+            <TabsContent value="all">
+              {loading ? (
+                <div className="flex justify-center items-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : filteredResources.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                  {filteredResources.map((resource) => (
+                    <ResourceCard key={resource.id} resource={resource} />
+                  ))}
                 </div>
               ) : (
-                <p className="text-center text-gray-500 mt-8">
-                  No resources found in this category
+                <p className="text-center text-muted-foreground mt-8">
+                  No resources found
                 </p>
               )}
             </TabsContent>
-          ))}
-        </Tabs>
+
+            {categories.map((category) => (
+              <TabsContent key={category.name} value={category.name}>
+                {category.resource.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                    {category.resource
+                      .filter((resource) =>
+                        resource.name
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase())
+                      )
+                      .map((resource) => (
+                        <ResourceCard key={resource.id} resource={resource} />
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground mt-8">
+                    No resources found in this category
+                  </p>
+                )}
+              </TabsContent>
+            ))}
+          </Tabs>
+        </motion.div>
       </div>
-    </>
+    </div>
   );
 };
 
-const ResourceCard = ({ resource }: { resource: Resource }) => (
-  <Card className="hover:shadow-lg transition-shadow">
-    <CardHeader>
-      <CardTitle className="text-xl">{resource.name}</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p className="text-gray-600 mb-4">{resource.data}</p>
-      <div className="flex justify-between text-sm text-gray-500">
-        <span>By {resource.user.name}</span>
-        {resource.category && (
-          <span className="bg-gray-100 px-2 py-1 rounded-full">
-            {resource.category.name}
-          </span>
-        )}
-      </div>
-    </CardContent>
-  </Card>
-);
+const ResourceCard = ({ resource }: { resource: Resource }) => {
+  const renderFilePreview = () => {
+    try {
+      const fileData = JSON.parse(resource.data);
+      if (fileData.fileType.startsWith('image/')) {
+        return (
+          <div className="relative h-48 w-full mb-4 overflow-hidden rounded-lg">
+            <img
+              src={fileData.data}
+              alt={resource.name}
+              className="object-cover w-full h-full"
+            />
+          </div>
+        );
+      } else if (fileData.fileType.startsWith('video/')) {
+        return (
+          <div className="relative h-48 w-full mb-4 overflow-hidden rounded-lg">
+            <video
+              controls
+              className="w-full h-full object-cover"
+            >
+              <source src={fileData.data} type={fileData.fileType} />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        );
+      } else if (fileData.fileType === 'application/pdf') {
+        return (
+          <div className="flex items-center gap-2 mb-4 p-3 bg-secondary rounded-lg">
+            <FileText className="h-6 w-6" />
+            <span className="text-sm">{fileData.fileName}</span>
+          </div>
+        );
+      }
+    } catch (error) {
+      return null;
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="h-full hover:shadow-lg transition-shadow">
+        <CardHeader>
+          <CardTitle className="text-xl">{resource.name}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {renderFilePreview()}
+          <p className="text-muted-foreground mb-4 line-clamp-3">
+            {resource.description || resource.data}
+          </p>
+          <div className="flex flex-col gap-3">
+            {resource.links && resource.links.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {resource.links.map((link, index) => (
+                  <a
+                    key={index}
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    Link {index + 1}
+                  </a>
+                ))}
+              </div>
+            )}
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">By {resource.user.name}</span>
+              {resource.category && (
+                <span className="bg-secondary px-3 py-1 rounded-full text-secondary-foreground">
+                  {resource.category.name}
+                </span>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
 
 export default Explore;
