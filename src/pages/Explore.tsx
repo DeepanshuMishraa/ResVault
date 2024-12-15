@@ -45,15 +45,14 @@ const Explore = () => {
         new Set(data.feed.map((r: Resource) => r.category?.name))
       ).filter(Boolean);
 
-      setCategories(
-        uniqueCategories.map((name) => ({
-          name: name as string,
-          resource: data.feed.filter(
-            (r: Resource) => r.category?.name === name
-          ),
-        }))
-      );
+      const categoryObjects = uniqueCategories.map((categoryName) => ({
+        name: categoryName as string,
+        resource: data.feed.filter(
+          (r: Resource) => r.category?.name === categoryName
+        ),
+      }));
 
+      setCategories(categoryObjects);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching resources:", error);
@@ -118,23 +117,17 @@ const Explore = () => {
 
             {categories.map((category) => (
               <TabsContent key={category.name} value={category.name}>
-                {category.resource.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                    {category.resource
-                      .filter((resource) =>
-                        resource.name
-                          .toLowerCase()
-                          .includes(searchQuery.toLowerCase())
-                      )
-                      .map((resource) => (
-                        <ResourceCard key={resource.id} resource={resource} />
-                      ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground mt-8">
-                    No resources found in this category
-                  </p>
-                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                  {category.resource
+                    .filter((resource) =>
+                      resource.name
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase())
+                    )
+                    .map((resource) => (
+                      <ResourceCard key={resource.id} resource={resource} />
+                    ))}
+                </div>
               </TabsContent>
             ))}
           </Tabs>
