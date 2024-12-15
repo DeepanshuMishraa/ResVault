@@ -48,7 +48,9 @@ const Explore = () => {
       setCategories(
         uniqueCategories.map((name) => ({
           name: name as string,
-          resource: data.feed.filter((r: Resource) => r.category?.name === name),
+          resource: data.feed.filter(
+            (r: Resource) => r.category?.name === name
+          ),
         }))
       );
 
@@ -144,6 +146,14 @@ const Explore = () => {
 
 const ResourceCard = ({ resource }: { resource: Resource }) => {
   const renderFilePreview = () => {
+    if (!resource.fileUrl) {
+      return (
+        <div className="text-sm text-muted-foreground mb-4">
+          No preview available
+        </div>
+      );
+    }
+
     const fileUrl = resource.fileUrl;
     if (fileUrl.match(/\.(jpg|jpeg|png|gif)$/i)) {
       return (
@@ -172,7 +182,12 @@ const ResourceCard = ({ resource }: { resource: Resource }) => {
         </div>
       );
     }
-    return null;
+
+    return (
+      <div className="text-sm text-muted-foreground mb-4">
+        Unsupported file format
+      </div>
+    );
   };
 
   return (
@@ -207,7 +222,9 @@ const ResourceCard = ({ resource }: { resource: Resource }) => {
               </div>
             )}
             <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">By {resource.user.name}</span>
+              <span className="text-muted-foreground">
+                By {resource.user.name}
+              </span>
               {resource.category && (
                 <span className="bg-secondary px-3 py-1 rounded-full text-secondary-foreground">
                   {resource.category.name}
