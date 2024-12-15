@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 interface Resource {
   id: string;
   name: string;
-  data: string;
+  fileUrl: string;
   description?: string;
   links?: string[];
   category: {
@@ -144,41 +144,35 @@ const Explore = () => {
 
 const ResourceCard = ({ resource }: { resource: Resource }) => {
   const renderFilePreview = () => {
-    try {
-      const fileData = JSON.parse(resource.data);
-      if (fileData.fileType.startsWith('image/')) {
-        return (
-          <div className="relative h-48 w-full mb-4 overflow-hidden rounded-lg">
-            <img
-              src={fileData.data}
-              alt={resource.name}
-              className="object-cover w-full h-full"
-            />
-          </div>
-        );
-      } else if (fileData.fileType.startsWith('video/')) {
-        return (
-          <div className="relative h-48 w-full mb-4 overflow-hidden rounded-lg">
-            <video
-              controls
-              className="w-full h-full object-cover"
-            >
-              <source src={fileData.data} type={fileData.fileType} />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        );
-      } else if (fileData.fileType === 'application/pdf') {
-        return (
-          <div className="flex items-center gap-2 mb-4 p-3 bg-secondary rounded-lg">
-            <FileText className="h-6 w-6" />
-            <span className="text-sm">{fileData.fileName}</span>
-          </div>
-        );
-      }
-    } catch (error) {
-      return null;
+    const fileUrl = resource.fileUrl;
+    if (fileUrl.match(/\.(jpg|jpeg|png|gif)$/i)) {
+      return (
+        <div className="relative h-48 w-full mb-4 overflow-hidden rounded-lg">
+          <img
+            src={fileUrl}
+            alt={resource.name}
+            className="object-cover w-full h-full"
+          />
+        </div>
+      );
+    } else if (fileUrl.match(/\.(mp4|webm)$/i)) {
+      return (
+        <div className="relative h-48 w-full mb-4 overflow-hidden rounded-lg">
+          <video controls className="w-full h-full object-cover">
+            <source src={fileUrl} />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      );
+    } else if (fileUrl.match(/\.pdf$/i)) {
+      return (
+        <div className="flex items-center gap-2 mb-4 p-3 bg-secondary rounded-lg">
+          <FileText className="h-6 w-6" />
+          <span className="text-sm">PDF Document</span>
+        </div>
+      );
     }
+    return null;
   };
 
   return (
@@ -194,7 +188,7 @@ const ResourceCard = ({ resource }: { resource: Resource }) => {
         <CardContent>
           {renderFilePreview()}
           <p className="text-muted-foreground mb-4 line-clamp-3">
-            {resource.description || resource.data}
+            {resource.description}
           </p>
           <div className="flex flex-col gap-3">
             {resource.links && resource.links.length > 0 && (

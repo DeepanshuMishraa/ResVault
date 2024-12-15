@@ -19,22 +19,6 @@ export const FileUpload = () => {
   const [links, setLinks] = useState<string[]>([""]);
   const { user } = useAuth();
 
-  const convertFileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const base64WithType = {
-          data: reader.result as string,
-          fileType: file.type,
-          fileName: file.name,
-        };
-        resolve(JSON.stringify(base64WithType));
-      };
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -50,24 +34,25 @@ export const FileUpload = () => {
 
     try {
       setIsUploading(true);
-      const base64File = await convertFileToBase64(file);
+
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('name', name);
+      formData.append('category', category);
+      formData.append('description', description);
+      formData.append('userId', user?.userId as string);
+      formData.append('links', JSON.stringify(links.filter(link => link.trim() !== '')));
 
       const token = localStorage.getItem("token");
 
       const response = await axios.post(
         `${BACKEND_URL}/api/v1/upload`,
-        {
-          file: base64File,
-          name,
-          category,
-          description,
-          userId: user?.userId as string,
-          links: links.filter((link) => link.trim() !== ""),
-        },
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
           },
         }
       );
